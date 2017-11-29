@@ -6,8 +6,8 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    //implementation fileTree(include: ['*.jar'], dir: 'libs')
-    api files('libs/BaiduLBS_Android.jar')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    compile files('libs/BaiduLBS_Android.jar')
     compile 'io.reactivex.rxjava2:rxjava:2.1.7'
 }
 sourceCompatibility = "1.7"
