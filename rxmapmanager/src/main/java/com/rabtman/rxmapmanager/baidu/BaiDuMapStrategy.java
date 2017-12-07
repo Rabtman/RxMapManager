@@ -9,23 +9,29 @@ import io.reactivex.Single;
 
 /**
  * @author Rabtman
+ * 百度定位策略
  */
 public abstract class BaiDuMapStrategy extends BaseMapStrategy<BDLocation, LocationClient> {
 
+  private BDAbstractLocationListener mListener = new BDAbstractLocationListener() {
+    @Override
+    public void onReceiveLocation(BDLocation bdLocation) {
+      if (!mapProcessor.hasSubscribers()) {
+        return;
+      }
+      mapProcessor.onNext(bdLocation);
+    }
+  };
+
   public BaiDuMapStrategy() {
     super();
-    BDAbstractLocationListener mListener = new BDAbstractLocationListener() {
-      @Override
-      public void onReceiveLocation(BDLocation bdLocation) {
-        mapProcessor.onNext(bdLocation);
-      }
-    };
     mClient.registerLocationListener(mListener);
   }
 
   @Override
   public Flowable<BDLocation> getLastLocation() {
-    return Single.just(mClient.getLastKnownLocation()).toFlowable();
+    BDLocation location = mClient.getLastKnownLocation();
+    return location == null ? Flowable.<BDLocation>empty() : Single.just(location).toFlowable();
   }
 
   @Override
@@ -39,20 +45,23 @@ public abstract class BaiDuMapStrategy extends BaseMapStrategy<BDLocation, Locat
       if (mClient.isStarted()) {
         mClient.stop();
       }
+      mClient.unRegisterLocationListener(mListener);
       mClient = null;
     }
   }
 
   @Override
   public synchronized void onStart() {
-    if (mClient != null && !mClient.isStarted()) {
+    validClient();
+    if (!mClient.isStarted()) {
       mClient.start();
     }
   }
 
   @Override
   public synchronized void onStop() {
-    if (mClient != null && mClient.isStarted()) {
+    validClient();
+    if (mClient.isStarted()) {
       mClient.stop();
     }
   }

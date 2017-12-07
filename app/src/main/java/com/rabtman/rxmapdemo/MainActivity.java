@@ -3,18 +3,25 @@ package com.rabtman.rxmapdemo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.rabtman.rxmapmanager.RxMapManager;
+import com.rabtman.rxmapmanager.amap.AMapStrategy;
 import com.rabtman.rxmapmanager.baidu.BaiDuMapStrategy;
 import io.reactivex.functions.Consumer;
 
 public class MainActivity extends AppCompatActivity {
+
+  private Button start, stop, get;
+  private TextView result;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -23,11 +30,36 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-    Button start = findViewById(R.id.btn_start);
-    Button stop = findViewById(R.id.btn_stop);
-    Button get = findViewById(R.id.btn_get);
+    start = findViewById(R.id.btn_start);
+    stop = findViewById(R.id.btn_stop);
+    get = findViewById(R.id.btn_get);
+    result = findViewById(R.id.tv_result);
 
-    //初始化
+    //useAMap();
+    useBaiDu();
+
+    //接收定位信息
+    RxMapManager.getInstance().requestLocation()
+        .subscribe(new Consumer<BDLocation>() {
+          @Override
+          public void accept(BDLocation o) throws Exception {
+            if (o == null) {
+              result.append("【接收定位信息】 null\n");
+            } else {
+              result.append("【接收定位信息】lat:" + o.getLatitude()
+                  + "，lng:" + o.getLongitude() + "\n");
+            }
+          }
+        }, new Consumer<Throwable>() {
+          @Override
+          public void accept(Throwable throwable) throws Exception {
+            throwable.printStackTrace();
+          }
+        });
+  }
+
+  //使用百度定位
+  private void useBaiDu() {
     RxMapManager.getInstance().init(new BaiDuMapStrategy() {
       @Override
       public LocationClient initClient() {
@@ -39,8 +71,6 @@ public class MainActivity extends AppCompatActivity {
         option.setOpenGps(true);// 打开gps
         option.setIsNeedAddress(true);// 返回的定位结果包含地址信息
         option.setNeedDeviceDirect(true);// 返回的定位结果包含手机机头的方向
-        option.disableCache(true);//禁用缓存定位
-        option.setEnableSimulateGps(true);//可选，默认false，设置是否需要过滤gps仿真结果，默认需要
 
         LocationClient locationClient = new LocationClient(getBaseContext());
         locationClient.setLocOption(option);
@@ -48,21 +78,18 @@ public class MainActivity extends AppCompatActivity {
         return locationClient;
       }
     });
-
     start.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View view) {
         RxMapManager.getInstance().onStart();
       }
     });
-
     stop.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View view) {
         RxMapManager.getInstance().onStop();
       }
     });
-
     get.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -70,8 +97,12 @@ public class MainActivity extends AppCompatActivity {
             .subscribe(new Consumer<BDLocation>() {
               @Override
               public void accept(BDLocation o) throws Exception {
-                Log.d("MainActivity",
-                    "get location-----lat:" + o.getLatitude() + "|lng:" + o.getLongitude());
+                if (o == null) {
+                  result.append("【主动获取定位】 null\n");
+                } else {
+                  result.append("【主动获取定位】lat:" + o.getLatitude()
+                      + "，lng:" + o.getLongitude() + "\n");
+                }
               }
             }, new Consumer<Throwable>() {
               @Override
@@ -81,15 +112,57 @@ public class MainActivity extends AppCompatActivity {
             });
       }
     });
+  }
 
-    //获取持续定位的信息
-    RxMapManager.getInstance().requestLocation()
-        .subscribe(new Consumer<BDLocation>() {
-          @Override
-          public void accept(BDLocation o) throws Exception {
-            Log.d("MainActivity", "lat:" + o.getLatitude() + "|lng:" + o.getLongitude());
-          }
-        });
+  //使用高德定位
+  private void useAMap() {
+    RxMapManager.getInstance().init(new AMapStrategy() {
+      @Override
+      public AMapLocationClient initClient() {
+        AMapLocationClientOption option = new AMapLocationClientOption();
+        option.setNeedAddress(true);
+        option.setInterval(5000);
+
+        AMapLocationClient client = new AMapLocationClient(getBaseContext());
+        client.setLocationOption(option);
+
+        return client;
+      }
+    });
+    start.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        RxMapManager.getInstance().onStart();
+      }
+    });
+    stop.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        RxMapManager.getInstance().onStop();
+      }
+    });
+    get.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        RxMapManager.getInstance().getLastLocation()
+            .subscribe(new Consumer<AMapLocation>() {
+              @Override
+              public void accept(AMapLocation o) throws Exception {
+                if (o == null) {
+                  result.append("【主动获取定位】 null\n");
+                } else {
+                  result.append("【主动获取定位】lat:" + o.getLatitude()
+                      + "，lng:" + o.getLongitude() + "\n");
+                }
+              }
+            }, new Consumer<Throwable>() {
+              @Override
+              public void accept(Throwable throwable) throws Exception {
+                throwable.printStackTrace();
+              }
+            });
+      }
+    });
   }
 
 }

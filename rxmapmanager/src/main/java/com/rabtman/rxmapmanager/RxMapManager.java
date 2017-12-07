@@ -22,6 +22,9 @@ public class RxMapManager {
   }
 
   public void init(BaseMapStrategy strategy) {
+    if (mStrategy != null) {
+      destory();
+    }
     mStrategy = strategy;
   }
 

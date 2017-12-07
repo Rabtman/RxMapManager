@@ -20,6 +20,11 @@
   <uses-permission android:name="android.permission.INTERNET" />
   <!-- SD卡读取权限，用户写入离线定位数据-->
   <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+  <!--用于申请调用A-GPS模块-->
+  <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+  <!--用于申请获取蓝牙信息进行室内定位-->
+  <uses-permission android:name="android.permission.BLUETOOTH" />
+  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
   <application
     android:allowBackup="true"
@@ -39,14 +44,20 @@
       </intent-filter>
     </activity>
 
+    <!-- 百度地图-->
     <meta-data
       android:name="com.baidu.lbsapi.API_KEY"
       android:value="UDwUfKc9nb17sI2xs7Qtw5DUpc9hM1h3" />
-
     <service
       android:enabled="true"
       android:name="com.baidu.location.f"
       android:process=":remote" />
+
+    <!-- 高德地图-->
+    <meta-data
+      android:name="com.amap.api.v2.apikey"
+      android:value="a4bccf56b056e72ec0bedb44f8719973" />
+    <service android:name="com.amap.api.location.APSService" />
 
   </application>
 

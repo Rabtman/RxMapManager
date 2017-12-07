@@ -18,10 +18,17 @@ public abstract class BaseMapStrategy<L, C> {
 
   public BaseMapStrategy() {
     this.mClient = initClient();
+    validClient();
+    mapProcessor = PublishProcessor.create();
+  }
+
+  /**
+   * 校验client
+   */
+  protected void validClient() {
     if (mClient == null) {
       throw new RuntimeException("client can not be null");
     }
-    mapProcessor = PublishProcessor.create();
   }
 
   /**
