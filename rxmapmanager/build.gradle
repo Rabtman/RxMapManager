@@ -28,6 +28,9 @@ android {
 dependencies {
     compileOnly fileTree(include: ['*.jar'], dir: 'libs')
     compileOnly 'io.reactivex.rxjava2:rxjava:2.1.7'
+    compileOnly "com.android.support:support-annotations:${rootProject.ext.androidSupportSdkVersion}"
+    compileOnly files('libs/BaiduLBS_Android.jar')
+    compileOnly files('libs/AMap_Location_V3.6.1_20171012.jar')
 }
 
 Properties properties = new Properties()

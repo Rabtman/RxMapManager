@@ -44,6 +44,5 @@ dependencies {
     implementation files('libs/BaiduLBS_Android.jar')
     implementation files('libs/AMap_Location_V3.6.1_20171012.jar')
     implementation 'io.reactivex.rxjava2:rxjava:2.1.7'
-    implementation files('libs/rxmapmanager-release.aar')
-    //implementation project(':rxmapmanager')
+    implementation 'com.rabtman.rxmapmanager:rxmapmanager:0.1.0'
 }
